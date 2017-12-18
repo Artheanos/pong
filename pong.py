@@ -3,50 +3,52 @@ try:
     from tkinter import *
     from tkinter import font
 except ImportError:
-    print("\n\033[93mAttempting to install tkinter...\033[0m\n")
-    os.system('sudo apt-get install python3-tk')
-    print("\n\033[93mMake sure you're using python3.x\033[0m\n")
+    if sys.platform.startswith('win'):
+        print("\n\033[93mMaking sure you're using python3.x\033[0m\n")
+    else:
+        print("\n\033[93mAttempting to install tkinter...\033[0m\n")
+        os.system('sudo apt-get install python3-tk')
+        print("\n\033[93mRelaunch making sure you're using python3.x\033[0m\n")
     sys.exit()
-
 os.system('xset r off')
 
 root = Tk()
 root.winfo_toplevel().title("Cyka")
 root.configure(background='black')
-
 w = 500
 h = 700
 x = ((root.winfo_screenwidth()-w)/2)
 y = ((root.winfo_screenheight()-h)/2)
 root.geometry('%dx%d+%d+%d' % (w,h,x,y))
 
+helv = font.Font(family='Helvetica', size=26, weight='bold')
+
 top = Frame(root, height=50, width=w, background="black")
 top.pack()
 top.pack_propagate(0)
 
-helv = font.Font(family='Helvetica', size=26, weight='bold')
 l1 = Label(top, bg="black", fg="white", text="PRESS SPACE", padx=120, font=helv)
 l1.pack(side=LEFT,anchor=CENTER)
 l2 = Label(top, bg="black", fg="white", text="", padx=120, font=helv)
 l2.pack(side=RIGHT,anchor=CENTER)
 
-#bot = Frame(root)
-#bot.pack(side=BOTTOM)
+
 cw = w-100
 ch = h-100
-bd=10
+bd=8
 
 pl=40
-c = Canvas(root, background="white", width=cw, height=ch)
+c = Canvas(root, background="black", width=cw, height=ch)
 c.pack(anchor=CENTER)
 line = c.create_line(10,(ch-40)/2,10,(ch+40)/2,fill="red",width=5)
 line2 = c.create_line(cw-10,(ch-40)/2,cw-10,(ch+40)/2,fill="blue",width=5)
-ball = c.create_oval((cw-bd)/2,(ch-bd)/2,(cw+bd)/2,(ch+bd)/2, fill="black")
+ball = c.create_oval((cw-bd)/2,(ch-bd)/2,(cw+bd)/2,(ch+bd)/2, fill="white", outline="")
 
 a=0;a2=0
-b=0;b2=0
+b=0;b2=1 ###### !!!!  b2 should = 0   if line2  ==  player
 fx=0;fy=0
 s1=0;s2=0
+to=int(ch/2)
 
 def key(event):
     global a,b,a2,b2,fx,fy
@@ -59,7 +61,7 @@ def key(event):
             fx=-3
         l1['text']=s1
         l2['text']=s2
-        move()
+        main()
     if ek == "s":
         a=1;a2+=1
     if ek == "w":
@@ -71,8 +73,8 @@ def key(event):
     if ek == "r":
         root.mainloop()
 
-def move():
-    global fx,fy
+def main():
+    global fx,fy,b,to
     while 1:
         x1=c.coords(ball)[0]
         y1=c.coords(ball)[1]
@@ -98,23 +100,47 @@ def move():
         c.move(line,0,4*a)
         c.move(line2,0,4*b)
         c.move(ball,fx,fy)
+
+        move_to( to )
+
         time.sleep(1/60)
         c.update()
 
+def move_to(y):
+    global b
+    if c.coords(line2)[1]+pl/2 < y:
+        b=1
+    else:
+        b=-1
+
 def hit(y):
-    global fy
+    global fx,fy,to
     diff = (y+pl/2) - (c.coords(ball)[1]+bd/2)
     fy-=diff/10
+    if fx>0:
+        to=c.coords(ball)[1]+bd/2 + fy*(cw-20)/fx
+        if fy>0:
+            to -= pl/2
+        else:
+            to += pl/2
+        while to > ch or to < 0:
+            if to > ch:
+                to = 2*ch-to
+            if to < 0:
+                to *=- 1
+    else:
+        to=int(ch/2)
 
 def reset(point):
-    global ball,fx,fy,s1,s2
+    global ball,fx,fy,s1,s2,to
     if point==1:
         s1+=1
     if point==2:
         s2+=1
     c.delete(ball)
-    ball = c.create_oval((cw-bd)/2,(ch-bd)/2,(cw+bd)/2,(ch+bd)/2, fill="black")
+    ball = c.create_oval((cw-bd)/2,(ch-bd)/2,(cw+bd)/2,(ch+bd)/2, fill="white", outline="")
     fx=0 ; fy=0
+    to = ch/2
     l1['text']=s1
     l2['text']=s2
 
@@ -128,18 +154,8 @@ def stop(event):
         b2-=1
         b=b*b2
 
-'''def stop(event):
-    ek = event.keysym
-    if ek in [p.down,p.up]:
-        stop()
-    if ek in [p2.down,p2.up]:
-        stop()'''
-
 root.bind("<KeyPress>",key)
 root.bind("<KeyRelease>",stop)
-
-#butt = Button(top, text="Dupa")
-#label = Label(bot, text="Trolololo")
 
 root.mainloop()
 
