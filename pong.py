@@ -3,7 +3,9 @@ try:
     from tkinter import *
     from tkinter import font
 except ImportError:
-    print("Please use Python3. If you did, then I don't know what's wrong")
+    print("\n\033[93mAttempting to install tkinter...\033[0m\n")
+    os.system('sudo apt-get install python3-tk')
+    print("\n\033[93mMake sure you're using python3.x\033[0m\n")
     sys.exit()
 
 os.system('xset r off')
