@@ -4,7 +4,8 @@ try:
     from tkinter import font
 except ImportError:
     if sys.platform.startswith('win'):
-        print("\n\033[93mMaking sure you're using python3.x\033[0m\n")
+        print("This game ain't fo' windows")
+        sys.exit()
     else:
         print("\n\033[93mAttempting to install tkinter...\033[0m\n")
         os.system('sudo apt-get install python3-tk')
